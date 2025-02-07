@@ -9,8 +9,15 @@ from google import genai
 import os
 from nltk.sentiment import SentimentIntensityAnalyzer
 import nltk
+from statistics import fmean
+from nltk.tokenize import word_tokenize
+from nltk.probability import FreqDist
+from nltk.corpus import stopwords
+import string
 
-nltk.download()
+swp = stopwords.words("portuguese")
+swp.extend(string.punctuation)
+
 sia = SentimentIntensityAnalyzer()
 
 load_dotenv()
@@ -68,9 +75,33 @@ sample_ingles = traduzido.text.split(";;;;;;")
 
 
 i = 0
+sentiments = []
 for s in sample:
-    print(s)
-    print("traduzido: "+sample_ingles[i])
-    print(sia.polarity_scores(sample_ingles[i]))
-    print("==========")
+    if len(s) > 100:
+        print(s[0:100]+"...")
+    else:
+        print(s) 
+    
+    sentiment = sia.polarity_scores(sample_ingles[i])
+    sentiments.append(sentiment["compound"])
+    print(f"Result: {round((sentiment["compound"]+1)*50, 2)}%")
+    print("-"*50)
     i+=1
+
+
+print(f"media final: {(fmean(sentiments)+1)*50}%")
+print("-"*50)
+
+
+
+sample = ".".join(sample)
+tokens = word_tokenize(sample.lower())
+
+filtrada = []
+for t in tokens:
+    if t not in swp:
+        filtrada.append(t)
+
+freq = FreqDist(filtrada)
+
+print(freq.most_common(30))
