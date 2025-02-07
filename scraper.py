@@ -7,6 +7,11 @@ from selenium.webdriver.common.action_chains import ActionChains
 from dotenv import load_dotenv
 from google import genai
 import os
+from nltk.sentiment import SentimentIntensityAnalyzer
+import nltk
+
+nltk.download()
+sia = SentimentIntensityAnalyzer()
 
 load_dotenv()
 
@@ -16,12 +21,9 @@ print(GEMINIKEY)
 client = genai.Client(api_key=GEMINIKEY)
 
 
-from textblob import TextBlob
-from textblob.sentiments import NaiveBayesAnalyzer
-
 browser = webdriver.Chrome()
 
-link = "https://www.youtube.com/watch?v=L1czIgvo3-I"
+link = "https://www.youtube.com/watch?v=W9AO7g2Cgdc"
 
 #https://www.selenium.dev/pt-br/documentation/webdriver/actions_api/wheel/
 
@@ -55,7 +57,7 @@ sample = get_comment_sample(link, 20, browser, False)
 
 prompt = ";;;;;;".join(sample)
 
-prompt = "Traduza para ingles o seguinte prompt e mantenha os comentarios separados por ';;;;;;':"+prompt
+prompt = "Traduza para ingles o seguinte prompt e mantenha os comentarios separados por ';;;;;;'. Responda apenas o texto traduzido, nada mais:"+prompt
 
 traduzido = client.models.generate_content(
     model="gemini-2.0-flash",
@@ -69,6 +71,6 @@ i = 0
 for s in sample:
     print(s)
     print("traduzido: "+sample_ingles[i])
-    print(TextBlob(sample_ingles[i], analyzer=NaiveBayesAnalyzer()).sentiment)
+    print(sia.polarity_scores(sample_ingles[i]))
     print("==========")
     i+=1
