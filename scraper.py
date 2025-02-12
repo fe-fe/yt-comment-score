@@ -23,14 +23,13 @@ sia = SentimentIntensityAnalyzer()
 load_dotenv()
 
 GEMINIKEY = os.getenv("GEMINIKEY")
-print(GEMINIKEY)
 
 client = genai.Client(api_key=GEMINIKEY)
 
 
 browser = webdriver.Chrome()
 
-link = "https://www.youtube.com/watch?v=W9AO7g2Cgdc"
+link = "https://www.youtube.com/watch?v=S-2fw-UOcbw"
 
 #https://www.selenium.dev/pt-br/documentation/webdriver/actions_api/wheel/
 
@@ -88,8 +87,13 @@ for s in sample:
     print("-"*50)
     i+=1
 
+media = (fmean(sentiments)+1)*50
+if media >= 50:
+    result = "POSITIVA"
+else:
+    result = "NEGATIVA"
 
-print(f"media final: {(fmean(sentiments)+1)*50}%")
+print(f"media final: {media}% ({result})")
 print("-"*50)
 
 
