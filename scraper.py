@@ -1,13 +1,8 @@
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import ElementNotInteractableException
 from time import sleep
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
-
-browser = webdriver.Chrome()
-
-link = "https://www.youtube.com/watch?v=S-2fw-UOcbw"
 
 #https://www.selenium.dev/pt-br/documentation/webdriver/actions_api/wheel/
 
