@@ -40,7 +40,7 @@ def translate(sample: list) -> list:
 def get_polarity(sample: list) -> list:
     polarity = []
     for s in sample:
-        p = sia.polarity_scores(sample[s]) # processa os sentimentos do texto
+        p = sia.polarity_scores(s) # processa os sentimentos do texto
         polarity.append(p["compound"])
 
     media = (fmean(polarity)+1)*50 # faz a media das polaridades e converte em porcentagem, variando entre 0 e 100%

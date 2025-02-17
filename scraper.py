@@ -4,6 +4,7 @@ from time import sleep
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 
+
 #https://www.selenium.dev/pt-br/documentation/webdriver/actions_api/wheel/
 
 def get_comment_sample(link: str, qtd: int, browser: webdriver.Chrome, exceed=True) -> list:
@@ -11,6 +12,10 @@ def get_comment_sample(link: str, qtd: int, browser: webdriver.Chrome, exceed=Tr
     browser.get(link)
     sleep(1) # espera o conteudo da pagina ser carregado
 
+    title = browser.title
+    title = title[0:len(title)-10] # remove a watermark do titulo da pagina
+    thumbnail = f"https://img.youtube.com/vi/{link.split("=")[1]}/mqdefault.jpg" # url para thumbnail
+    
     """
     enquanto a quantidade desejada de comentarios para amostra nao for alcancada,
     scrollar a pagina para baixo e procurar por mais comentarios
@@ -37,10 +42,8 @@ def get_comment_sample(link: str, qtd: int, browser: webdriver.Chrome, exceed=Tr
 
         except ElementNotInteractableException:
             continue
-
-    browser.close()
     
     if not exceed:
         sample = sample[0:qtd]
-    return sample
+    return sample, title, thumbnail
 
