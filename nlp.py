@@ -38,13 +38,17 @@ def translate(sample: list) -> list:
 
 
 def get_polarity(sample: list) -> list:
+    sample_ingles = translate(sample)
+    positive = 0
     polarity = []
-    for s in sample:
+    for s in sample_ingles:
         p = sia.polarity_scores(s) # processa os sentimentos do texto
         polarity.append(p["compound"])
+        if p["compound"] > 0:
+            positive += 1
 
     media = (fmean(polarity)+1)*50 # faz a media das polaridades e converte em porcentagem, variando entre 0 e 100%
-    return polarity, media
+    return polarity, media, positive
 
 
 def get_common_words(sample: list) -> list:

@@ -23,29 +23,41 @@ header = ft.Text(
     text_align=ft.TextAlign.CENTER, 
 )
 
-avg = ft.Text()
+posbar = ft.LinearGradient(
+    begin=ft.alignment.center_left,
+    end=ft.alignment.center_right,
+    colors=[color4, color4, color1, color1],
+    stops=[0, 0.0, 0.0, 1]
+)
 
-img = ft.Image(src="https://img.youtube.com/vi/NRLP2_ZyiyE/maxresdefault.jpg", width=400, border_radius=15)
+avg = ft.Text(expand_loose=1)
+
+img = ft.Image(src="https://img.youtube.com/vi/HMYO8fqyoXk/mqdefault.jpg", border_radius=15)
+
+
+def updateVideoInfo(title, url):
+    header.value = title
+    img.src = url
+    
+
+def updatePosBar(polarity):
+    avg.value = f"{polarity[1]}% avg polarity | {polarity[2]}/{len(polarity[0])} positive comments" 
+    posbar.stops[1] = polarity[2]/len(polarity[0])
+    posbar.stops[2] = polarity[2]/len(polarity[0])
 
 def handleSearchBt(e):
-    global header
     header.value = "please wait..."
     e.page.update()
     link = link_input.value
-    sample = get_comment_sample(link, 5, browser, False)
-    header.value = sample[1]
-    print(sample[2])
-    img.src = sample[2]
+    sample = get_comment_sample(link, 50, browser, updateVideoInfo, e, False)
+    polarity = get_polarity(sample)
+    updatePosBar(polarity)
     e.page.update()
-    sample_ingles = translate(sample[0])
-    polarity = get_polarity(sample_ingles)
-    avg.value = str(polarity[1])
-    common_words = get_common_words(sample[0])
-    e.page.update()
-    
     
 
 def main(page: ft.Page):
+
+
 
     page.bgcolor = color1
     page.padding = ft.padding.only(bottom=50)
@@ -84,7 +96,13 @@ def main(page: ft.Page):
             header,
             ft.Divider(height=1, color=color1),
             img,
-            avg
+            ft.Container(
+                gradient=posbar,
+                padding=10,
+                border_radius=8,
+                border=ft.border.all(1, color4),
+                content=avg,
+            )
         ],
         expand=True
     )
