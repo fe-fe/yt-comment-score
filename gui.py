@@ -1,5 +1,5 @@
 import flet as ft
-from scraper import get_comment_sample
+from scraper import get_comment_sample, get_video_details
 from nlp import get_common_words, get_polarity
 from nlp import *
 from selenium import webdriver
@@ -13,51 +13,53 @@ options.add_argument("--headless=new")
 options.add_argument("--mute-audio")
 
 browser = webdriver.Chrome(options)
-content = white_container()
+mainContainer = white_container()
 
-link_input = text_field()
-
+content_row = ft.Row(
+    alignment=ft.MainAxisAlignment.CENTER,
+    expand=1,
+    controls=[mainContainer]
+)
 
 header = ft.Text(
     "waiting for input...",  
     text_align=ft.TextAlign.CENTER, 
 )
 
-posbar = ft.LinearGradient(
-    begin=ft.alignment.center_left,
-    end=ft.alignment.center_right,
-    colors=[color4, color4, color1, color1],
-    stops=[0, 0.0, 0.0, 1]
-)
+mainContent = ft.Column(
+        controls=[header, ft.Divider(height=1, color=color1)],
+        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+        expand=True
+    )
 
-avg = ft.Text(expand_loose=1)
+mainContainer.content = mainContent
 
-img = ft.Image(src="https://img.youtube.com/vi/HMYO8fqyoXk/mqdefault.jpg", border_radius=15)
+link_input = text_field()
 
 
-def updateVideoInfo(title, url):
-    header.value = title
-    img.src = url
-    
 
-def updatePosBar(polarity):
-    avg.value = f"{polarity[1]}% avg polarity | {polarity[2]}/{len(polarity[0])} positive comments" 
-    posbar.stops[1] = polarity[2]/len(polarity[0])
-    posbar.stops[2] = polarity[2]/len(polarity[0])
+
+
 
 def handleSearchBt(e):
-    header.value = "please wait..."
-    e.page.update()
+    header.value = "requesting url..."
     link = link_input.value
-    sample = get_comment_sample(link, 50, browser, updateVideoInfo, e, False)
+    e.page.update()
+    details = get_video_details(link)
+    mainContent.controls = mainContent.controls[:2] # remove o conteudo anterior
+    mainContent.controls.append(create_content_box(details[0], details[1]))
+    header.value = "getting comment sample..."
+    e.page.update()
+    sample = get_comment_sample(link, 50, browser, False)
+    header.value = "processing data..."
+    e.page.update()
     polarity = get_polarity(sample)
-    updatePosBar(polarity)
+    append_avg_bar(polarity, f"nltk: {polarity:.2f}", mainContent.controls[-1])
+    header.value = "done!"
     e.page.update()
     
 
 def main(page: ft.Page):
-
-
 
     page.bgcolor = color1
     page.padding = ft.padding.only(bottom=50)
@@ -66,11 +68,17 @@ def main(page: ft.Page):
     vw = page.width / 100
     vh = page.height / 100
 
+    global mainContainer
+    mainContainer.width = vw*40
+
     global link_input
     link_input.value = ""
     link_input.label = "video link"
 
     global header
+    header.style = ft.TextStyle(color=color8, size=3*vh)
+
+    global mainContent
 
     search_bar = ft.Container(
         bgcolor=white1,
@@ -87,42 +95,16 @@ def main(page: ft.Page):
         )
     )
 
-    header.style = ft.TextStyle(color=color8, size=3*vh)
-
-    content.width = vw*40
-    content.content = ft.Column(
-        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-        controls=[
-            header,
-            ft.Divider(height=1, color=color1),
-            img,
-            ft.Container(
-                gradient=posbar,
-                padding=10,
-                border_radius=8,
-                border=ft.border.all(1, color4),
-                content=avg,
-            )
-        ],
-        expand=True
-    )
-
     main_column = ft.Column(
         spacing=20,
         expand=True,
         alignment=ft.alignment.center,
         controls=[
             search_bar,
-            ft.Row(
-                alignment=ft.MainAxisAlignment.CENTER,
-                controls=[content],
-                expand=1
-            ),
-            
+            content_row
         ]
     )
     
-
     page.add(main_column)
 
 ft.app(main)

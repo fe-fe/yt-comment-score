@@ -3,29 +3,27 @@ from selenium.common.exceptions import ElementNotInteractableException
 from time import sleep
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
+import requests
+from bs4 import BeautifulSoup
 
 
-#https://www.selenium.dev/pt-br/documentation/webdriver/actions_api/wheel/
+def get_video_details(url: str):
+    img = f"https://img.youtube.com/vi/{url.split("=")[1]}/mqdefault.jpg" # url para thumbnail
 
-def get_comment_sample(
-        link: str, 
-        qtd: int, 
-        browser: webdriver.Chrome, 
-        update,
-        e,
-        exceed=True,
-        
-    ) -> list:
+    content = requests.get(url).content
+    soup = BeautifulSoup(content, "html.parser")
+    title = soup.find("title").text
+    title = title[0:len(title)-10] # remove a watermark do titulo da pagina
+
+    return title, img
+
+
+def get_comment_sample(link: str, qtd: int, browser: webdriver.Chrome, exceed=True) -> list:
+    #https://www.selenium.dev/pt-br/documentation/webdriver/actions_api/wheel/
+    
     sample = []
     browser.get(link)
     sleep(1) # espera o conteudo da pagina ser carregado
-
-    title = browser.title
-    title = title[0:len(title)-10] # remove a watermark do titulo da pagina
-    thumbnail = f"https://img.youtube.com/vi/{link.split("=")[1]}/mqdefault.jpg" # url para thumbnail
-    
-    update(title, thumbnail)
-    e.page.update()
 
     """
     enquanto a quantidade desejada de comentarios para amostra nao for alcancada,

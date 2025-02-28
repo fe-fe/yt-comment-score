@@ -48,7 +48,7 @@ def get_polarity(sample: list) -> list:
             positive += 1
 
     media = (fmean(polarity)+1)*50 # faz a media das polaridades e converte em porcentagem, variando entre 0 e 100%
-    return polarity, media, positive
+    return media
 
 
 def get_common_words(sample: list) -> list:
