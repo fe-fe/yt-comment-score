@@ -6,12 +6,16 @@ from statistics import fmean
 from nltk.tokenize import word_tokenize
 from nltk.probability import FreqDist
 from nltk.corpus import stopwords
+from textblob.en.sentiments import PatternAnalyzer
 import string
+
+tb_analysis = PatternAnalyzer().analyze
+
 
 swp = stopwords.words("portuguese")
 swp.extend(string.punctuation)
 
-sia = SentimentIntensityAnalyzer()
+nltk_analysis = SentimentIntensityAnalyzer()
 
 load_dotenv()
 
@@ -39,16 +43,16 @@ def translate(sample: list) -> list:
 
 def get_polarity(sample: list) -> list:
     sample_ingles = translate(sample)
-    positive = 0
-    polarity = []
+    nltk_group = []
+    textblob_group = []
     for s in sample_ingles:
-        p = sia.polarity_scores(s) # processa os sentimentos do texto
-        polarity.append(p["compound"])
-        if p["compound"] > 0:
-            positive += 1
-
-    media = (fmean(polarity)+1)*50 # faz a media das polaridades e converte em porcentagem, variando entre 0 e 100%
-    return media
+        nltk_score = nltk_analysis.polarity_scores(s)['compound'] # processa os sentimentos do texto
+        textblob_score = tb_analysis(s)[0] # processa os sentimentos do texto
+        nltk_group.append(nltk_score)
+        textblob_group.append(textblob_score)
+    media_nltk = (fmean(nltk_group)+1)*50 # faz a media das polaridades e converte em porcentagem, variando entre 0 e 100%
+    media_textblob = (fmean(textblob_group)+1)*50 # faz a media das polaridades e converte em porcentagem, variando entre 0 e 100%
+    return [[media_nltk, "nltk"], [media_textblob, "textblob"]]
 
 
 def get_common_words(sample: list) -> list:

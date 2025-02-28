@@ -14,6 +14,7 @@ options.add_argument("--mute-audio")
 
 browser = webdriver.Chrome(options)
 mainContainer = white_container()
+mainContainer.padding = 20
 
 content_row = ft.Row(
     alignment=ft.MainAxisAlignment.CENTER,
@@ -37,24 +38,21 @@ mainContainer.content = mainContent
 link_input = text_field()
 
 
-
-
-
-
 def handleSearchBt(e):
     header.value = "requesting url..."
     link = link_input.value
     e.page.update()
     details = get_video_details(link)
     mainContent.controls = mainContent.controls[:2] # remove o conteudo anterior
-    mainContent.controls.append(create_content_box(details[0], details[1]))
+    mainContent.controls.append(create_content_box(details[0], details[1])) # cria o conteudo do video
     header.value = "getting comment sample..."
     e.page.update()
-    sample = get_comment_sample(link, 50, browser, False)
+    sample = get_comment_sample(link, 20, browser, False)
     header.value = "processing data..."
     e.page.update()
     polarity = get_polarity(sample)
-    append_avg_bar(polarity, f"nltk: {polarity:.2f}", mainContent.controls[-1])
+    for p in polarity:
+        append_avg_bar(p[0], f"{p[1]}: {p[0]:.0f}%", mainContent)
     header.value = "done!"
     e.page.update()
     

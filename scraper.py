@@ -37,18 +37,27 @@ def get_comment_sample(link: str, qtd: int, browser: webdriver.Chrome, exceed=Tr
     Ex: caso  qtd = 25 exceed=true, a funcao pode retornar 20 ou mais comentarios, geralmente variando de 1 a 10
     """
 
+    max_retries = 5
+
     while len(sample) < qtd:
         try:
             ActionChains(browser)\
                 .scroll_by_amount(0, 200)\
                 .perform()
-
+            sleep(0.5) # espera o conteudo ser carregado
             comments = []
             for comment in browser.find_elements(By.ID, "content-text"):
                 comments.append(comment.find_element(By.TAG_NAME, "span").text)
 
-            sample.extend(list(set(comments) - set(sample))) # garante que nao vai se repetir
+            if len(comments) == 0:
+                max_retries -= 1
+            else:
+                sample.extend(list(set(comments) - set(sample))) # garante que nao vai se repetir
+                max_retries = 5
 
+            if max_retries == 0:
+                break
+            
         except ElementNotInteractableException:
             continue
     
